@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "",
     "scripts": {
-        "update": "pnpm add qqlx-core && pnpm add qqlx-cdk && pnpm add qqlx-sdk",
+        "update": "pnpm update qqlx-core && pnpm update qqlx-cdk && pnpm update qqlx-sdk && pnpm install qqlx-core && pnpm install qqlx-cdk && pnpm install qqlx-sdk",
         "dev": "set DROPLET=127.0.0.1:1001 && nest start --watch",
         "mac-dev": "DROPLET=127.0.0.1:1001 nest start --watch",
         "build": "npm run update && nest build"
@@ -17,10 +17,11 @@
         "@nestjs/microservices": "^10.2.10",
         "@nestjs/platform-express": "^10.2.10",
         "@nestjs/typeorm": "^10.0.1",
+        "axios": "^1.6.2",
         "pg": "^8.11.3",
         "qqlx-cdk": "^0.1.8",
-        "qqlx-core": "^2.0.36",
-        "qqlx-sdk": "^0.1.7",
+        "qqlx-core": "^2.0.39",
+        "qqlx-sdk": "^0.1.8",
         "reflect-metadata": "^0.1.13",
         "rxjs": "^7.8.1",
         "source-map-support": "^0.5.21",

@@ -7,9 +7,7 @@ import { PondLogSchema } from "qqlx-cdk";
 import { getLocalNetworkIPs, DropletLocationMessenger } from "qqlx-sdk";
 
 import { DropletModule } from "./droplet/module";
-import PondLogController from "./user/controller.rest";
-import { PondLogService } from "./user/service";
-import { PondLogDao } from "./user/dao";
+import PondUserController from "./user/controller.tcp";
 
 /** 相关解释
  * @imports 导入一个模块中 exports 的内容，放入公共资源池中
@@ -22,7 +20,7 @@ import { PondLogDao } from "./user/dao";
             imports: [DropletModule],
             inject: [DropletLocationMessenger],
             useFactory: async (pondDropletMessenger: DropletLocationMessenger) => {
-                const node_db = await pondDropletMessenger.get({ name: SHANGHAI_POSTGRESQL_DROPLET });
+                const node_db = await pondDropletMessenger.get({ key: SHANGHAI_POSTGRESQL_DROPLET });
                 const mess = node_db.droplet?.remark?.split(";") || [];
                 const dbname = mess[0];
                 const username = mess[1];
@@ -46,7 +44,7 @@ import { PondLogDao } from "./user/dao";
         }),
         TypeOrmModule.forFeature([PondLogSchema]),
     ],
-    providers: [DropletLocationMessenger, PondLogDao, PondLogService],
-    controllers: [PondLogController],
+    providers: [DropletLocationMessenger],
+    controllers: [PondUserController],
 })
 export class TcpModule {}
