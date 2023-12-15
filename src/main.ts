@@ -1,33 +1,33 @@
 import { NestFactory } from "@nestjs/core";
 import { MicroserviceOptions, Transport } from "@nestjs/microservices";
 
-import {} from "qqlx-core";
+import { } from "qqlx-core";
 import { toNumber, toString, toBoolean } from "qqlx-cdk";
 import { getLocalNetworkIPs } from "qqlx-sdk";
 
-import { AppModule } from "./app.module";
+import { RestModule } from "./rest.module";
+import { TcpModule } from "./tcp.module";
 
-async function bootstrap() {
-    console.log("\n---- ---- ----");
-    const ips = getLocalNetworkIPs();
-    console.log(ips);
-
+async function bootstrap () {
     const TCP_PORT = 1002;
     const HTTP_PORT = 2002;
 
     // 对内的微服务
-    const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
+    const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(TcpModule, {
         transport: Transport.TCP,
         options: { host: "0.0.0.0", port: TCP_PORT },
     });
     await microservice.listen();
-    console.log(`qqlx-pond-log tcp is: ${TCP_PORT}`);
 
     // 对外的 RESTful API
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(RestModule);
     await app.listen(HTTP_PORT);
 
-    console.log(`qqlx-pond-log http is: ${HTTP_PORT}`);
-    console.log("---- ---- ---- \n");
+    console.log("\n---- ---- ---- main.ts");
+    const ips = getLocalNetworkIPs();
+    console.log(`qqlx-pond-log:ip: ${Object.values(ips[0] || {}).reverse().join(".")}`);
+    console.log(`qqlx-pond-log:tcp: ${TCP_PORT}`);
+    console.log(`qqlx-pond-log:http: ${HTTP_PORT}`);
+    console.log("---- ---- ---- \nrunning success!");
 }
 bootstrap();
