@@ -2,12 +2,12 @@ import { Module, Injectable } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
-import { DropletLocation, SHANGHAI_POSTGRESQL_DROPLET, DROPLET_POND_LOG } from "qqlx-core";
+import { DropletLocation, SHANGHAI_POSTGRESQL_DROPLET, DROPLET_POND_USER } from "qqlx-core";
 import { PondLogSchema } from "qqlx-cdk";
 import { getLocalNetworkIPs, DropletLocationMessenger } from "qqlx-sdk";
 
-import { DropletModule } from "./droplet/module";
-import PondUserController from "./user/controller.tcp";
+import { DropletModule } from "../_/droplet.module";
+import PondUserController from "./user.controller";
 
 /** 相关解释
  * @imports 导入一个模块中 exports 的内容，放入公共资源池中
@@ -28,6 +28,13 @@ import PondUserController from "./user/controller.tcp";
 
                 console.log("\n---- ---- ---- tcp.module.ts");
                 console.log(`droplet-location:get - ${SHANGHAI_POSTGRESQL_DROPLET}:${node_db.droplet?.lan_ip}:${node_db.droplet?.port}`);
+
+                const ips = getLocalNetworkIPs();
+                const droplet: DropletLocation = pondDropletMessenger.getSchema();
+                droplet.lan_ip = ips[0].ip;
+                droplet.port = 1003;
+                pondDropletMessenger.keepAlive(DROPLET_POND_USER, droplet); // async
+                console.log(`droplet-location:patch ing... - ${DROPLET_POND_USER}:${droplet.lan_ip}:${droplet.port}`);
                 console.log("---- ---- ----\n");
 
                 return {
@@ -44,7 +51,7 @@ import PondUserController from "./user/controller.tcp";
         }),
         TypeOrmModule.forFeature([PondLogSchema]),
     ],
-    providers: [DropletLocationMessenger],
+    providers: [],
     controllers: [PondUserController],
 })
 export class TcpModule {}

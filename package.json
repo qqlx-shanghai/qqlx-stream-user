@@ -1,5 +1,5 @@
 {
-    "name": "qqlx-stream-user",
+    "name": "qqlx-pond-user",
     "version": "1.0.0",
     "description": "",
     "scripts": {
@@ -19,9 +19,9 @@
         "@nestjs/typeorm": "^10.0.1",
         "axios": "^1.6.2",
         "pg": "^8.11.3",
-        "qqlx-cdk": "^0.1.8",
-        "qqlx-core": "^2.0.39",
-        "qqlx-sdk": "^0.1.8",
+        "qqlx-cdk": "^0.1.12",
+        "qqlx-core": "^2.0.44",
+        "qqlx-sdk": "^0.1.10",
         "reflect-metadata": "^0.1.13",
         "rxjs": "^7.8.1",
         "source-map-support": "^0.5.21",

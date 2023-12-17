@@ -6,7 +6,7 @@ import { DropletLocation, SHANGHAI_POSTGRESQL_DROPLET, DROPLET_POND_USER } from 
 import { PondLogSchema } from "qqlx-cdk";
 import { getLocalNetworkIPs, DropletLocationMessenger } from "qqlx-sdk";
 
-import { DropletModule } from "./droplet/module";
+import { DropletModule } from "../_/droplet.module";
 // import PondLogController from "./log/controller.rest";
 // import { PondLogService } from "./log/service";
 // import { PondLogDao } from "./log/dao";
@@ -31,13 +31,6 @@ import { DropletModule } from "./droplet/module";
 
                 console.log("\n---- ---- ---- rest.module.ts");
                 console.log(`droplet-location:get - ${SHANGHAI_POSTGRESQL_DROPLET}:${node_db.droplet?.lan_ip}:${node_db.droplet?.port}`);
-
-                const ips = getLocalNetworkIPs();
-                const droplet: DropletLocation = pondDropletMessenger.getSchema();
-                droplet.lan_ip = ips[0].ip;
-                droplet.port = 1003;
-                pondDropletMessenger.keepAlive(DROPLET_POND_USER, droplet); // async
-                console.log(`droplet-location:patch ing... - ${DROPLET_POND_USER}:${droplet.lan_ip}:${droplet.port}`);
                 console.log("---- ---- ----\n");
 
                 return {
@@ -54,7 +47,7 @@ import { DropletModule } from "./droplet/module";
         }),
         TypeOrmModule.forFeature([PondLogSchema]),
     ],
-    providers: [DropletLocationMessenger],
+    providers: [],
     controllers: [],
 })
 export class RestModule {}

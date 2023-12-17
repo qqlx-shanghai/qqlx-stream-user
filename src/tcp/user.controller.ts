@@ -13,11 +13,7 @@ import { getLocalNetworkIPs, DropletLocationMessenger } from "qqlx-sdk";
 @Controller()
 export default class {
     request!: AxiosInstance;
-    constructor(
-        //
-        private readonly DropletLocationMessenger: DropletLocationMessenger
-    ) // private readonly PondLogService: PondLogService
-    {
+    constructor() {
         this.request = axios.create({
             baseURL: "https://qqlx.tech",
             timeout: 5000,
