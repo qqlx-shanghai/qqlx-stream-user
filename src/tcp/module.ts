@@ -2,9 +2,9 @@ import { Module, Injectable } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
-import { DropletLocation, SHANGHAI_POSTGRESQL_DROPLET, DROPLET_POND_USER } from "qqlx-core";
+import { DropletHost, SHANGHAI_POSTGRESQL_DROPLET, DROPLET_STREAM_USER } from "qqlx-core";
 import { PondLogSchema } from "qqlx-cdk";
-import { getLocalNetworkIPs, DropletLocationMessenger } from "qqlx-sdk";
+import { getLocalNetworkIPs, DropletHostMessenger } from "qqlx-sdk";
 
 import { DropletModule } from "../_/droplet.module";
 import PondUserController from "./user.controller";
@@ -18,29 +18,29 @@ import PondUserController from "./user.controller";
     imports: [
         TypeOrmModule.forRootAsync({
             imports: [DropletModule],
-            inject: [DropletLocationMessenger],
-            useFactory: async (pondDropletMessenger: DropletLocationMessenger) => {
+            inject: [DropletHostMessenger],
+            useFactory: async (pondDropletMessenger: DropletHostMessenger) => {
                 const node_db = await pondDropletMessenger.get({ key: SHANGHAI_POSTGRESQL_DROPLET });
-                const mess = node_db.droplet?.remark?.split(";") || [];
+                const mess = node_db?.remark?.split(";") || [];
                 const dbname = mess[0];
                 const username = mess[1];
                 const passwd = mess[2];
 
                 console.log("\n---- ---- ---- tcp.module.ts");
-                console.log(`droplet-location:get - ${SHANGHAI_POSTGRESQL_DROPLET}:${node_db.droplet?.lan_ip}:${node_db.droplet?.port}`);
+                console.log(`droplet-host:get - ${SHANGHAI_POSTGRESQL_DROPLET}:${node_db?.lan_ip}:${node_db?.port}`);
 
                 const ips = getLocalNetworkIPs();
-                const droplet: DropletLocation = pondDropletMessenger.getSchema();
+                const droplet: DropletHost = pondDropletMessenger.getSchema();
                 droplet.lan_ip = ips[0].ip;
                 droplet.port = 1003;
-                pondDropletMessenger.keepAlive(DROPLET_POND_USER, droplet); // async
-                console.log(`droplet-location:patch ing... - ${DROPLET_POND_USER}:${droplet.lan_ip}:${droplet.port}`);
+                pondDropletMessenger.keepAlive(DROPLET_STREAM_USER, droplet); // async
+                console.log(`droplet-host:patch ing... - ${DROPLET_STREAM_USER}:${droplet.lan_ip}:${droplet.port}`);
                 console.log("---- ---- ----\n");
 
                 return {
                     type: "postgres",
-                    host: node_db.droplet?.lan_ip,
-                    port: node_db.droplet?.port,
+                    host: node_db?.lan_ip,
+                    port: node_db?.port,
                     username: username,
                     password: passwd,
                     database: dbname,
@@ -54,4 +54,4 @@ import PondUserController from "./user.controller";
     providers: [],
     controllers: [PondUserController],
 })
-export class TcpModule {}
+export class TcpModule { }

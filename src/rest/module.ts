@@ -2,9 +2,9 @@ import { Module, Injectable } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
-import { DropletLocation, SHANGHAI_POSTGRESQL_DROPLET, DROPLET_POND_USER } from "qqlx-core";
+import { DropletHost, SHANGHAI_POSTGRESQL_DROPLET } from "qqlx-core";
 import { PondLogSchema } from "qqlx-cdk";
-import { getLocalNetworkIPs, DropletLocationMessenger } from "qqlx-sdk";
+import { getLocalNetworkIPs, DropletHostMessenger } from "qqlx-sdk";
 
 import { DropletModule } from "../_/droplet.module";
 // import PondLogController from "./log/controller.rest";
@@ -21,22 +21,22 @@ import { DropletModule } from "../_/droplet.module";
     imports: [
         TypeOrmModule.forRootAsync({
             imports: [DropletModule],
-            inject: [DropletLocationMessenger],
-            useFactory: async (pondDropletMessenger: DropletLocationMessenger) => {
+            inject: [DropletHostMessenger],
+            useFactory: async (pondDropletMessenger: DropletHostMessenger) => {
                 const node_db = await pondDropletMessenger.get({ key: SHANGHAI_POSTGRESQL_DROPLET });
-                const mess = node_db.droplet?.remark?.split(";") || [];
+                const mess = node_db?.remark?.split(";") || [];
                 const dbname = mess[0];
                 const username = mess[1];
                 const passwd = mess[2];
 
                 console.log("\n---- ---- ---- rest.module.ts");
-                console.log(`droplet-location:get - ${SHANGHAI_POSTGRESQL_DROPLET}:${node_db.droplet?.lan_ip}:${node_db.droplet?.port}`);
+                console.log(`droplet-host:get - ${SHANGHAI_POSTGRESQL_DROPLET}:${node_db?.lan_ip}:${node_db?.port}`);
                 console.log("---- ---- ----\n");
 
                 return {
                     type: "postgres",
-                    host: node_db.droplet?.lan_ip,
-                    port: node_db.droplet?.port,
+                    host: node_db?.lan_ip,
+                    port: node_db?.port,
                     username: username,
                     password: passwd,
                     database: dbname,
@@ -50,4 +50,4 @@ import { DropletModule } from "../_/droplet.module";
     providers: [],
     controllers: [],
 })
-export class RestModule {}
+export class RestModule { }

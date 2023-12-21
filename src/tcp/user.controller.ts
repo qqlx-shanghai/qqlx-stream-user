@@ -3,9 +3,9 @@ import { EventPattern, MessagePattern } from "@nestjs/microservices";
 import axios from "axios";
 import type { AxiosInstance } from "axios";
 
-import { PondLog, PATH_USER, getUserDto, getUserRes, UserInfo, Response } from "qqlx-core";
+import { PondLog, PATH_USER, getStreamUserDto, getStreamUserRes, UserInfo, Response } from "qqlx-core";
 import { toNumber, toString, ToResponse, getPageDto, getResponseData } from "qqlx-cdk";
-import { getLocalNetworkIPs, DropletLocationMessenger } from "qqlx-sdk";
+import { getLocalNetworkIPs, DropletHostMessenger } from "qqlx-sdk";
 
 // import { PondLogDao } from "./dao";
 // import { PondLogService } from "./service";
@@ -26,7 +26,7 @@ export default class {
 
     @MessagePattern(`${PATH_USER}/get`)
     @ToResponse()
-    async getUserInfo(dto: getUserDto): Promise<getUserRes> {
+    async getUserInfo (dto: getStreamUserDto): Promise<getStreamUserRes> {
         // <UserInfo>
         const res: Response<{ userId: string }> = await this.request.post("/qqlx/user/wechat/get", {}, { headers: { Authorization: dto.Authorization } });
         const data = getResponseData(res);
