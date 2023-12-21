@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "",
     "scripts": {
-        "update": "pnpm update qqlx-core && pnpm install qqlx-core && pnpm update qqlx-cdk && pnpm install qqlx-cdk && pnpm update qqlx-sdk && pnpm install qqlx-sdk",
+        "update": "pnpm update qqlx-core && pnpm install qqlx-core@latest && pnpm update qqlx-cdk && pnpm install qqlx-cdk@latest && pnpm update qqlx-sdk && pnpm install qqlx-sdk@latest",
         "dev": "set DROPLET=127.0.0.1:1001 && nest start --watch",
         "mac-dev": "DROPLET=127.0.0.1:1001 nest start --watch",
         "build": "npm run update && nest build"
