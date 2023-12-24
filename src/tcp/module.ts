@@ -8,6 +8,7 @@ import { getLocalNetworkIPs, DropletHostMessenger } from "qqlx-sdk";
 
 import { DropletModule } from "../_/droplet.module";
 import PondUserController from "./user.controller";
+import { TCP_PORT } from "./_";
 
 /** 相关解释
  * @imports 导入一个模块中 exports 的内容，放入公共资源池中
@@ -32,7 +33,7 @@ import PondUserController from "./user.controller";
                 const ips = getLocalNetworkIPs();
                 const droplet: DropletHost = pondDropletMessenger.getSchema();
                 droplet.lan_ip = ips[0].ip;
-                droplet.port = 1003;
+                droplet.port = TCP_PORT;
                 pondDropletMessenger.keepAlive(DROPLET_STREAM_USER, droplet); // async
                 console.log(`droplet-host:patch ing... - ${DROPLET_STREAM_USER}:${droplet.lan_ip}:${droplet.port}`);
                 console.log("---- ---- ----\n");
