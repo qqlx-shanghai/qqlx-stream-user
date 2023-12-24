@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
 import { DropletHost, SHANGHAI_POSTGRESQL_DROPLET, DROPLET_STREAM_USER } from "qqlx-core";
-import { PondLogSchema } from "qqlx-cdk";
+import {} from "qqlx-cdk";
 import { getLocalNetworkIPs, DropletHostMessenger } from "qqlx-sdk";
 
 import { DropletModule } from "../_/droplet.module";
