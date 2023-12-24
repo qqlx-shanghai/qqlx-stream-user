@@ -45,13 +45,13 @@ import PondUserController from "./user.controller";
                     password: passwd,
                     database: dbname,
                     logging: false,
-                    entities: [PondLogSchema],
+                    entities: [],
                 };
             },
         }),
-        TypeOrmModule.forFeature([PondLogSchema]),
+        TypeOrmModule.forFeature([]),
     ],
     providers: [],
     controllers: [PondUserController],
 })
-export class TcpModule { }
+export class TcpModule {}

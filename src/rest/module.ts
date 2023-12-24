@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
 import { DropletHost, SHANGHAI_POSTGRESQL_DROPLET } from "qqlx-core";
-import { PondLogSchema } from "qqlx-cdk";
+import {} from "qqlx-cdk";
 import { getLocalNetworkIPs, DropletHostMessenger } from "qqlx-sdk";
 
 import { DropletModule } from "../_/droplet.module";
@@ -41,13 +41,13 @@ import { DropletModule } from "../_/droplet.module";
                     password: passwd,
                     database: dbname,
                     logging: false,
-                    entities: [PondLogSchema],
+                    entities: [],
                 };
             },
         }),
-        TypeOrmModule.forFeature([PondLogSchema]),
+        TypeOrmModule.forFeature([]),
     ],
     providers: [],
     controllers: [],
 })
-export class RestModule { }
+export class RestModule {}
