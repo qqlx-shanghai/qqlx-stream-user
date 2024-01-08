@@ -2,13 +2,15 @@ import { Module, Injectable } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
-import { DropletHost, SHANGHAI_POSTGRESQL_DROPLET, DROPLET_STREAM_USER } from "qqlx-core";
-import {} from "qqlx-cdk";
-import { getLocalNetworkIPs, DropletHostMessenger } from "qqlx-sdk";
+import { DropletHost, DROPLET_SHANGHAI_POSTGRESQL, DROPLET_STREAM_USER } from "qqlx-core";
+import { StreamUserSchema, UserEmailSchema, UserTelecomSchema, UserWeChatSchema } from "qqlx-cdk";
+import { getLocalNetworkIPs, DropletHostRpc, StreamLogRpc } from "qqlx-sdk";
 
 import { DropletModule } from "../_/droplet.module";
-import PondUserController from "./user.controller";
+import StreamUserController from "./user.controller";
 import { TCP_PORT } from "./_";
+import { StreamUserDao, UserEmailDao, UserTelecomDao, UserWeChatDao } from "src/rest/user.dao";
+import { StreamUserService } from "src/rest/user.service";
 
 /** 相关解释
  * @imports 导入一个模块中 exports 的内容，放入公共资源池中
@@ -19,16 +21,16 @@ import { TCP_PORT } from "./_";
     imports: [
         TypeOrmModule.forRootAsync({
             imports: [DropletModule],
-            inject: [DropletHostMessenger],
-            useFactory: async (pondDropletMessenger: DropletHostMessenger) => {
-                const node_db = await pondDropletMessenger.get({ key: SHANGHAI_POSTGRESQL_DROPLET });
+            inject: [DropletHostRpc],
+            useFactory: async (pondDropletMessenger: DropletHostRpc) => {
+                const node_db = await pondDropletMessenger.get({ key: DROPLET_SHANGHAI_POSTGRESQL });
                 const mess = node_db?.remark?.split(";") || [];
                 const dbname = mess[0];
                 const username = mess[1];
                 const passwd = mess[2];
 
                 console.log("\n---- ---- ---- tcp.module.ts");
-                console.log(`droplet-host:get - ${SHANGHAI_POSTGRESQL_DROPLET}:${node_db?.lan_ip}:${node_db?.port}`);
+                console.log(`droplet-host:get - ${DROPLET_SHANGHAI_POSTGRESQL}:${node_db?.lan_ip}:${node_db?.port}`);
 
                 const ips = getLocalNetworkIPs();
                 const droplet: DropletHost = pondDropletMessenger.getSchema();
@@ -46,13 +48,13 @@ import { TCP_PORT } from "./_";
                     password: passwd,
                     database: dbname,
                     logging: false,
-                    entities: [],
+                    entities: [StreamUserSchema, UserWeChatSchema, UserTelecomSchema, UserEmailSchema],
                 };
             },
         }),
-        TypeOrmModule.forFeature([]),
+        TypeOrmModule.forFeature([StreamUserSchema, UserWeChatSchema, UserTelecomSchema, UserEmailSchema]),
     ],
-    providers: [],
-    controllers: [PondUserController],
+    providers: [DropletHostRpc, StreamLogRpc, StreamUserDao, UserWeChatDao, UserTelecomDao, UserEmailDao, StreamUserService],
+    controllers: [StreamUserController],
 })
-export class TcpModule {}
+export class TcpModule { }

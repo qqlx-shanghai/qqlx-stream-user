@@ -1,16 +1,16 @@
 import { NestFactory } from "@nestjs/core";
 import { MicroserviceOptions, Transport } from "@nestjs/microservices";
 
-import {} from "qqlx-core";
+import { } from "qqlx-core";
 import { toNumber, toString, toBoolean } from "qqlx-cdk";
-import { getLocalNetworkIPs } from "qqlx-sdk";
+import { getLocalNetworkIPs, CommonExceptionFilter, ResponseInterceptor, DropletHostRpc, StreamLogRpc } from "qqlx-sdk";
 
 import { TcpModule } from "./tcp/module";
 import { TCP_PORT } from "./tcp/_";
 import { RestModule } from "./rest/module";
 import { REST_PORT } from "./rest/_";
 
-async function bootstrap() {
+async function bootstrap () {
     // 对内的微服务
     const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(TcpModule, {
         transport: Transport.TCP,
@@ -20,6 +20,8 @@ async function bootstrap() {
 
     // 对外的 RESTful API
     const app = await NestFactory.create(RestModule);
+    app.useGlobalFilters(new CommonExceptionFilter(new StreamLogRpc(new DropletHostRpc())))
+    app.useGlobalInterceptors(new ResponseInterceptor(new StreamLogRpc(new DropletHostRpc())))
     await app.listen(REST_PORT);
 
     // System tips

@@ -1,9 +1,9 @@
 import { Module, Injectable } from "@nestjs/common";
 
-import { DropletHostMessenger } from "qqlx-sdk";
+import { DropletHostRpc } from "qqlx-sdk";
 
 @Module({
-    providers: [DropletHostMessenger],
-    exports: [DropletHostMessenger],
+    providers: [DropletHostRpc],
+    exports: [DropletHostRpc],
 })
 export class DropletModule { }
