@@ -5,7 +5,7 @@
     "scripts": {
         "update": "pnpm update qqlx-core && pnpm install qqlx-core@latest && pnpm update qqlx-cdk && pnpm install qqlx-cdk@latest && pnpm update qqlx-sdk && pnpm install qqlx-sdk@latest",
         "dev": "set DROPLET=127.0.0.1:6001 && nest start --watch",
-        "mac-dev": "DROPLET=192.168.1.7:6001 nest start --watch",
+        "mac-dev": "DROPLET=127.0.0.1:6001 nest start --watch",
         "build": "npm run update && nest build"
     },
     "author": "huangwenqiang",
@@ -23,9 +23,9 @@
         "jsonwebtoken": "^9.0.2",
         "nodemailer": "^6.9.8",
         "pg": "^8.11.3",
-        "qqlx-cdk": "^2.1.6",
+        "qqlx-cdk": "^2.1.7",
         "qqlx-core": "^2.1.25",
-        "qqlx-sdk": "^2.0.4",
+        "qqlx-sdk": "^2.0.5",
         "reflect-metadata": "^0.1.13",
         "rxjs": "^7.8.1",
         "source-map-support": "^0.5.21",

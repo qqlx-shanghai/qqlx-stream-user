@@ -3,17 +3,27 @@ import { InjectRepository } from "@nestjs/typeorm";
 
 import { Repository } from "typeorm";
 
-import { StreamUser, RELATIONS_STREAM_USER, UserWeChat, RELATIONS_STREAM_USER_WECHAT, UserTelecom, RELATIONS_STREAM_USER_TELECOM, UserEmail, RELATIONS_STREAM_USER_EMAIL } from "qqlx-core";
 import {
-    toNumber, toString,
-    StreamUserSchema, UserWeChatSchema, UserTelecomSchema, UserEmailSchema
+    StreamUser,
+    RELATIONS_STREAM_USER,
+    UserWeChat,
+    RELATIONS_STREAM_USER_WECHAT,
+    UserTelecom,
+    RELATIONS_STREAM_USER_TELECOM,
+    UserEmail,
+    RELATIONS_STREAM_USER_EMAIL,
+} from "qqlx-core";
+import {
+    toNumber,
+    toString,
+    // StreamUserSchema, UserWeChatSchema, UserTelecomSchema, UserEmailSchema
 } from "qqlx-cdk";
 import { getLocalNetworkIPs, PgDao } from "qqlx-sdk";
 
-// import { StreamUserSchema } from "../../../qqlx-cdk/schema-production/stream-user"
-// import { UserWeChatSchema } from "../../../qqlx-cdk/schema-production/stream-user-wechat"
-// import { UserTelecomSchema } from "../../../qqlx-cdk/schema-production/stream-user-telecom"
-// import { UserEmailSchema } from "../../../qqlx-cdk/schema-production/stream-user-email"
+import { StreamUserSchema } from "../../../qqlx-cdk/schema-production/stream-user";
+import { UserWeChatSchema } from "../../../qqlx-cdk/schema-production/stream-user-wechat";
+import { UserTelecomSchema } from "../../../qqlx-cdk/schema-production/stream-user-telecom";
+import { UserEmailSchema } from "../../../qqlx-cdk/schema-production/stream-user-email";
 
 @Injectable()
 export class StreamUserDao extends PgDao<StreamUser> {
