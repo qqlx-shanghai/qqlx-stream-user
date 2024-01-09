@@ -46,7 +46,7 @@ export default class {
     /** 邮箱登录 */
     @Post()
     async post (@Body() dto: postStreamUserEmailDto): Promise<postStreamUserEmailRes> {
-        const code = toString(dto.code)
+        const code = toString(dto.code).toUpperCase()
 
         // 验证码是否已经过期
         const exist = this.codeVerifyMap.get(code)
@@ -59,7 +59,6 @@ export default class {
 
         const user = await this.StreamUserService.getUserByEmail(email)
         const result = { authorization: "" }
-        console.log(user, "user")
 
         // 已经注册过了
         if (user) {
@@ -87,8 +86,8 @@ export default class {
         if (!match) throw new Error(`请输入正确的邮箱：${email}`)
 
         // 是否已经注册过了
-        const user = await this.StreamUserService.getUserByEmail(email)
-        if (user) throw new Error(`邮箱已经注册: ${email}`)
+        // const user = await this.StreamUserService.getUserByEmail(email)
+        // if (user) throw new Error(`邮箱已经注册: ${email}`)
 
         // 是否已经发送过邮件（一分钟一封）
         const exist = this.emailVerifyMap.get(email)

@@ -12,6 +12,11 @@ import { TCP_PORT } from "./_";
 import { StreamUserDao, UserEmailDao, UserTelecomDao, UserWeChatDao } from "src/rest/user.dao";
 import { StreamUserService } from "src/rest/user.service";
 
+// import { StreamUserSchema } from "../../../qqlx-cdk/schema-production/stream-user"
+// import { UserWeChatSchema } from "../../../qqlx-cdk/schema-production/stream-user-wechat"
+// import { UserTelecomSchema } from "../../../qqlx-cdk/schema-production/stream-user-telecom"
+// import { UserEmailSchema } from "../../../qqlx-cdk/schema-production/stream-user-email"
+
 /** 相关解释
  * @imports 导入一个模块中 exports 的内容，放入公共资源池中
  * @providers 以及 inject，都是将公共资源池中的内容，放入应用池 controller 之中，所以其才能够使用/注入各种内容

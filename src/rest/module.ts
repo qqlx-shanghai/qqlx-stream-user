@@ -9,7 +9,14 @@ import { getLocalNetworkIPs, DropletHostRpc, StreamLogRpc } from "qqlx-sdk";
 import { DropletModule } from "../_/droplet.module";
 import { StreamUserDao, UserWeChatDao, UserTelecomDao, UserEmailDao } from "./user.dao";
 import { StreamUserService } from "./user.service";
+
 import UserEmailController from "./user-email.controller";
+import UserController from "./user.controller";
+
+// import { StreamUserSchema } from "../../../qqlx-cdk/schema-production/stream-user"
+// import { UserWeChatSchema } from "../../../qqlx-cdk/schema-production/stream-user-wechat"
+// import { UserTelecomSchema } from "../../../qqlx-cdk/schema-production/stream-user-telecom"
+// import { UserEmailSchema } from "../../../qqlx-cdk/schema-production/stream-user-email"
 
 /** 相关解释
  * @imports 导入一个模块中 exports 的内容，放入公共资源池中
@@ -48,6 +55,6 @@ import UserEmailController from "./user-email.controller";
         TypeOrmModule.forFeature([StreamUserSchema, UserWeChatSchema, UserTelecomSchema, UserEmailSchema]),
     ],
     providers: [DropletHostRpc, StreamLogRpc, StreamUserDao, UserWeChatDao, UserTelecomDao, UserEmailDao, StreamUserService],
-    controllers: [UserEmailController],
+    controllers: [UserController, UserEmailController],
 })
 export class RestModule { }

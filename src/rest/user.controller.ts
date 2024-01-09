@@ -1,14 +1,14 @@
-import { Controller, Query, Body, Get, Post, Patch, UseGuards, Headers, Put } from "@nestjs/common";
+import { Controller, Query, Body, Get, Post, Patch, UseGuards, Headers, Put, Req } from "@nestjs/common";
 import { createTransport, Transporter } from "nodemailer"
 
-import { StreamUser, PATH_STREAM_USER_EMAIL, getStreamUserDto, getStreamUserRes, putStreamUserDto, putStreamUserRes } from "qqlx-core";
+import { StreamUser, getStreamUserDto, getStreamUserRes, putStreamUserDto, putStreamUserRes, PATH_STREAM_USER } from "qqlx-core";
 import { toNumber, toString, ToResponse, getPageDto, getConditionMatchStr, UserEmailSchema } from "qqlx-cdk";
 import { DropletHostRpc, getLocalNetworkIPs, getRandomString, StreamLogRpc, UserGuard } from "qqlx-sdk";
 
 import { UserEmailDao, UserWeChatDao } from "./user.dao";
 import { StreamUserService } from "./user.service";
 
-@Controller(PATH_STREAM_USER_EMAIL)
+@Controller(PATH_STREAM_USER)
 export default class {
 
     constructor(

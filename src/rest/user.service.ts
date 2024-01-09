@@ -1,7 +1,7 @@
 import { sign, verify } from "jsonwebtoken";
 import { Injectable } from "@nestjs/common";
 
-import { StreamUser, PATH_STREAM_LOG, getStreamUserDto, getStreamUserRes, VARCHAR50_PG, ENUM_ERROR_CODE, UserInfo, UserEmail } from "qqlx-core";
+import { StreamUser, PATH_STREAM_LOG, getStreamUserDto, getStreamUserRes, VARCHAR50_PG, ENUM_ERROR_CODE, UserInfo, UserEmail, RELATIONS_STREAM_USER_WECHAT, RELATIONS_STREAM_USER_TELECOM, RELATIONS_STREAM_USER_EMAIL } from "qqlx-core";
 import { toNumber, toString, ToResponse, getPageDto, getConditionMatchStr, StreamUserSchema, getErrorTranslate, UserWeChatSchema, UserTelecomSchema, UserEmailSchema } from "qqlx-cdk";
 import { DropletHostRpc, getLocalNetworkIPs, getUUID32 } from "qqlx-sdk";
 
@@ -68,7 +68,6 @@ export class StreamUserService {
     /** 保证 user 具有一个登录令牌 */
     async putAuthorization (user: StreamUser, timeExpire: number) {
         const jwt_token = sign({ uuid32: user.uuid32, timeExpire }, this.jwtKey)
-        console.log(jwt_token, "putAuthorization")
         this.jwtMap.set(user.uuid32, jwt_token)
         if (Date.now() >= timeExpire) throw new Error(`请勿选择 ${new Date(timeExpire).toLocaleString()}`)
 
@@ -108,21 +107,23 @@ export class StreamUserService {
     private async getUser (uuid32?: string): Promise<StreamUser | null> {
         if (!uuid32) return null
 
-        const qb = await this.StreamUserDao.getQueryBuilder()
-        const match = await qb.where(`${this.StreamUserDao.relations_name}.uuid32 = :uuid32`, { uuid32 })
-            .getOne();
+        const qb = this.StreamUserDao.getQueryBuilder()
+            .where(`${this.StreamUserDao.relations_name}.uuid32 = :uuid32`, { uuid32 })
 
+        const match = await qb.getOne();
         return match || null
     }
 
     private async getUserInfo (uuid32: string): Promise<UserInfo | null> {
-        const qb = await this.StreamUserDao.getQueryBuilder()
-        const match = await qb.where(`${this.StreamUserDao.relations_name}.uuid32 = :uuid32`, { uuid32 })
-            .leftJoinAndSelect(UserWeChatSchema.name, 'joinWeChat', `${this.UserWeChatDao.relations_name}.uuid32 = ${this.StreamUserDao.relations_name}.uuid32`)
-            .leftJoinAndSelect(UserTelecomSchema.name, 'joinTelecom', `${this.UserTelecomDao.relations_name}.uuid32 = ${this.StreamUserDao.relations_name}.uuid32`)
-            .leftJoinAndSelect(UserEmailSchema.name, 'joinEmail', `${this.UserEmailDao.relations_name}.uuid32 = ${this.StreamUserDao.relations_name}.uuid32`)
-            .getOne();
+        const qb = this.StreamUserDao.getQueryBuilder()
+        qb
+            .leftJoinAndSelect(`${this.StreamUserDao.relations_name}.joinWeChatList`, `joinWeChatList`)
+            .leftJoinAndSelect(`${this.StreamUserDao.relations_name}.joinTelecomList`, `joinTelecomList`)
+            .leftJoinAndSelect(`${this.StreamUserDao.relations_name}.joinEmailList`, `joinEmailList`)
+        // .where(`${this.StreamUserDao.relations_name}.uuid32 = :uuid32`, { uuid32 })
+        // console.log(qb.getSql())
 
+        const match = await qb.getOne();
         return match || null
     }
 
