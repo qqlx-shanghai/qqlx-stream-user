@@ -13,6 +13,7 @@ import {
     RELATIONS_STREAM_USER_WECHAT,
     RELATIONS_STREAM_USER_TELECOM,
     RELATIONS_STREAM_USER_EMAIL,
+    ENUM_STREAM_LOG,
 } from "qqlx-core";
 import {
     toNumber,
@@ -20,13 +21,14 @@ import {
     ToResponse,
     getPageDto,
     getConditionMatchStr,
+    StreamLogSchema,
     StreamUserSchema,
     getErrorTranslate,
     UserWeChatSchema,
     UserTelecomSchema,
     UserEmailSchema,
 } from "qqlx-cdk";
-import { DropletHostRpc, getLocalNetworkIPs, getUUID32 } from "qqlx-sdk";
+import { DropletHostRpc, StreamLogRpc, getLocalNetworkIPs, getUUID32 } from "qqlx-sdk";
 
 import { StreamUserDao, UserEmailDao, UserTelecomDao, UserWeChatDao } from "./user.dao";
 
@@ -44,6 +46,7 @@ export class StreamUserService {
     constructor(
         //
         private readonly DropletHostRpc: DropletHostRpc,
+        private readonly StreamLogRpc: StreamLogRpc,
         private readonly StreamUserDao: StreamUserDao,
         private readonly UserWeChatDao: UserWeChatDao,
         private readonly UserTelecomDao: UserTelecomDao,
@@ -53,7 +56,7 @@ export class StreamUserService {
     }
 
     /** 获取用户信息（较耗时） */
-    async getUserInfoByAuthorization(authorization: string): Promise<UserInfo> {
+    async getUserInfoByAuthorization (authorization: string): Promise<UserInfo> {
         const user = await this.getUserByAuthorization(authorization);
         const info = await this.getUserInfo(user.uuid32);
         if (!info) throw ENUM_ERROR_CODE.NOT_FOUND_USER;
@@ -62,7 +65,7 @@ export class StreamUserService {
     }
 
     /** 快速鉴权 */
-    async getUserByAuthorization(authorization: string): Promise<StreamUser> {
+    async getUserByAuthorization (authorization: string): Promise<StreamUser> {
         const info = verify(authorization, this.jwtKey) as JwtInfo;
 
         // 不能过期
@@ -88,7 +91,9 @@ export class StreamUserService {
     // ===========================================================================================
 
     /** 保证 user 具有一个登录令牌 */
-    async putAuthorization(user: StreamUser, timeExpire: number) {
+    async putAuthorization (user: StreamUser, timeExpire: number) {
+        this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, `user.ervice:putAuthorization`, Object.keys(user).toString())
+
         const jwt_token = sign({ uuid32: user.uuid32, timeExpire }, this.jwtKey);
         this.jwtMap.set(user.uuid32, jwt_token);
         if (Date.now() >= timeExpire) throw new Error(`请勿选择 ${new Date(timeExpire).toLocaleString()}`);
@@ -103,19 +108,22 @@ export class StreamUserService {
     // ===========================================================================================
     // ===========================================================================================
 
-    async getUserByEmail(email: string): Promise<StreamUser | null> {
+    async getUserByEmail (email: string): Promise<StreamUser | null> {
         const qb = await this.UserEmailDao.getQueryBuilder();
         const match = await qb.where(`${this.UserEmailDao.relations_name}.email = :email`, { email }).getOne();
 
+        this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, `user.ervice:getUserByEmail`, email)
         return this.getUser(match?.uuid32);
     }
 
     /** 新增用户 */
-    async post(): Promise<StreamUser> {
+    async post (): Promise<StreamUser> {
         const schema = new StreamUserSchema();
-        schema.uuid32 = getUUID32();
-        const user = await this.StreamUserDao.insertOne(schema);
-        return user;
+        const _user = await this.StreamUserDao.insertOne(schema);
+        this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, `user.ervice:post`, _user.uuid32)
+
+        const user = await this.getUser(_user.uuid32)
+        return user as StreamUser;
     }
 
     // ===========================================================================================
@@ -125,7 +133,7 @@ export class StreamUserService {
     // ===========================================================================================
     // ===========================================================================================
 
-    private async getUser(uuid32?: string): Promise<StreamUser | null> {
+    private async getUser (uuid32?: string): Promise<StreamUser | null> {
         if (!uuid32) return null;
 
         const qb = this.StreamUserDao.getQueryBuilder().where(`${this.StreamUserDao.relations_name}.uuid32 = :uuid32`, { uuid32 });
@@ -134,19 +142,21 @@ export class StreamUserService {
         return match || null;
     }
 
-    private async getUserInfo(uuid32: string): Promise<UserInfo | null> {
+    private async getUserInfo (uuid32: string): Promise<UserInfo | null> {
         const qb = this.StreamUserDao.getQueryBuilder();
-        qb.leftJoinAndSelect(`${this.StreamUserDao.relations_name}.uuid32`, `joinWeChatList`)
-            .leftJoinAndSelect(`${this.StreamUserDao.relations_name}.uuid32`, `joinTelecomList`)
-            .leftJoinAndSelect(`${this.StreamUserDao.relations_name}.uuid32`, `joinEmailList`);
+        qb
+            .leftJoinAndSelect(`${this.StreamUserDao.relations_name}.joinWeChatList`, `joinWeChatList`)
+            .leftJoinAndSelect(`${this.StreamUserDao.relations_name}.joinTelecomList`, `joinTelecomList`)
+            .leftJoinAndSelect(`${this.StreamUserDao.relations_name}.joinEmailList`, `joinEmailList`);
         // .where(`${this.StreamUserDao.relations_name}.uuid32 = :uuid32`, { uuid32 })
-        // console.log(qb.getSql())
 
+
+        this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, `user.ervice:getUserInfo`, qb.getSql())
         const match = await qb.getOne();
         return match || null;
     }
 
-    private async initial() {
+    private async initial () {
         const jwt_private = await this.DropletHostRpc.get({ key: "jwt_private" });
         this.jwtKey = jwt_private.remark;
     }

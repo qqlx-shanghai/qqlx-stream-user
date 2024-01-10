@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
 import { DropletHost, DROPLET_SHANGHAI_POSTGRESQL, DROPLET_STREAM_USER } from "qqlx-core";
-// import { StreamUserSchema, UserEmailSchema, UserTelecomSchema, UserWeChatSchema } from "qqlx-cdk";
+import { StreamUserSchema, UserEmailSchema, UserTelecomSchema, UserWeChatSchema } from "qqlx-cdk";
 import { getLocalNetworkIPs, DropletHostRpc, StreamLogRpc } from "qqlx-sdk";
 
 import { DropletModule } from "../_/droplet.module";
@@ -12,10 +12,10 @@ import { TCP_PORT } from "./_";
 import { StreamUserDao, UserEmailDao, UserTelecomDao, UserWeChatDao } from "src/rest/user.dao";
 import { StreamUserService } from "src/rest/user.service";
 
-import { StreamUserSchema } from "../../../qqlx-cdk/schema-production/stream-user";
-import { UserWeChatSchema } from "../../../qqlx-cdk/schema-production/stream-user-wechat";
-import { UserTelecomSchema } from "../../../qqlx-cdk/schema-production/stream-user-telecom";
-import { UserEmailSchema } from "../../../qqlx-cdk/schema-production/stream-user-email";
+// import { StreamUserSchema } from "../../../qqlx-cdk/schema-production/stream-user";
+// import { UserWeChatSchema } from "../../../qqlx-cdk/schema-production/stream-user-wechat";
+// import { UserTelecomSchema } from "../../../qqlx-cdk/schema-production/stream-user-telecom";
+// import { UserEmailSchema } from "../../../qqlx-cdk/schema-production/stream-user-email";
 
 /** 相关解释
  * @imports 导入一个模块中 exports 的内容，放入公共资源池中
@@ -62,4 +62,4 @@ import { UserEmailSchema } from "../../../qqlx-cdk/schema-production/stream-user
     providers: [DropletHostRpc, StreamLogRpc, StreamUserDao, UserWeChatDao, UserTelecomDao, UserEmailDao, StreamUserService],
     controllers: [StreamUserController],
 })
-export class TcpModule {}
+export class TcpModule { }

@@ -1,7 +1,7 @@
 import { Controller, Query, Body, Get, Post, Patch, UseGuards } from "@nestjs/common";
 import { createTransport, Transporter } from "nodemailer";
 
-import { StreamUser, PATH_STREAM_USER_EMAIL, getStreamUserEmailCodeDto, postStreamUserEmailDto, postStreamUserEmailRes } from "qqlx-core";
+import { StreamUser, PATH_STREAM_USER_EMAIL, getStreamUserEmailCodeDto, postStreamUserEmailDto, postStreamUserEmailRes, ENUM_STREAM_LOG } from "qqlx-core";
 import { toNumber, toString, ToResponse, getPageDto, getConditionMatchStr, UserEmailSchema } from "qqlx-cdk";
 import { DropletHostRpc, getLocalNetworkIPs, getRandomString, StreamLogRpc, UserGuard } from "qqlx-sdk";
 
@@ -39,21 +39,21 @@ export default class {
         private readonly StreamLogRpc: StreamLogRpc,
         private readonly StreamUserService: StreamUserService,
         private readonly UserEmailDao: UserEmailDao
-    ) {}
+    ) { }
 
     /** 邮箱登录 */
     @Post()
-    async post(@Body() dto: postStreamUserEmailDto): Promise<postStreamUserEmailRes> {
+    async post (@Body() dto: postStreamUserEmailDto): Promise<postStreamUserEmailRes> {
         const code = toString(dto.code).toUpperCase();
 
         // 验证码是否已经过期
         const exist = this.codeVerifyMap.get(code);
-        if (!exist) throw new Error(`请输入正确的验证码: ${code}`);
+        if (!exist) throw new Error(`无效的验证码: ${code}`);
 
         const now = Date.now();
         const email = toString(exist.split(":")[0]);
         const timeExpire = toNumber(exist.split(":")[1]) + this.emailVerifyTimes;
-        if (now >= timeExpire) throw new Error(`验证码已经过期: ${email}`);
+        if (now >= timeExpire) throw new Error(`验证码已经过期: ${code}`);
 
         const user = await this.StreamUserService.getUserByEmail(email);
         const result = { authorization: "" };
@@ -78,7 +78,7 @@ export default class {
     }
 
     @Get(`/code`)
-    async get(@Query() dto: getStreamUserEmailCodeDto) {
+    async get (@Query() dto: getStreamUserEmailCodeDto) {
         const email = toString(dto.email);
         const match = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
         if (!match) throw new Error(`请输入正确的邮箱：${email}`);
@@ -98,19 +98,21 @@ export default class {
 
         // 发送邮件
         const code = getRandomString().toUpperCase();
+
         await this.postEmail({
             to: email,
             subject: "Verify Code",
-            text: `Your email code to login is: ${code}`,
+            text: `${code}`,
         });
 
         // 缓存
+        // this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, 'email code', code)
         const now = Date.now();
         this.emailVerifyMap.set(email, `${code}:${now}`);
         this.codeVerifyMap.set(code, `${email}:${now}`);
     }
 
-    private async postEmail(option: EmailOption) {
+    private async postEmail (option: EmailOption) {
         if (!this.emailTransport) await this.initialEmailTransporter();
 
         option.from = this.emailOfficial;
@@ -122,7 +124,7 @@ export default class {
         });
     }
 
-    private async initialEmailTransporter() {
+    private async initialEmailTransporter () {
         const official_mail = await this.DropletHostRpc.get({ key: `official_mail` });
         this.emailOfficial = official_mail.remark;
 
