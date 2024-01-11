@@ -14,6 +14,7 @@ import {
     RELATIONS_STREAM_USER_TELECOM,
     RELATIONS_STREAM_USER_EMAIL,
     ENUM_STREAM_LOG,
+    _Owner,
 } from "qqlx-core";
 import {
     toNumber,
@@ -65,7 +66,7 @@ export class StreamUserService {
     }
 
     /** 快速鉴权 */
-    async getUserByAuthorization (authorization: string): Promise<StreamUser> {
+    async getUserByAuthorization (authorization: string): Promise<_Owner> {
         const info = verify(authorization, this.jwtKey) as JwtInfo;
 
         // 不能过期
@@ -80,7 +81,7 @@ export class StreamUserService {
         const jwt_token = this.jwtMap.get(info.uuid32);
         if (jwt_token && jwt_token !== authorization) throw ENUM_ERROR_CODE.AUTHORIZED_REPEAT;
 
-        return user;
+        return { uuid32: user.uuid32 };
     }
 
     // ===========================================================================================
@@ -91,11 +92,11 @@ export class StreamUserService {
     // ===========================================================================================
 
     /** 保证 user 具有一个登录令牌 */
-    async putAuthorization (user: StreamUser, timeExpire: number) {
-        this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, `user.ervice:putAuthorization`, Object.keys(user).toString())
+    async putAuthorization (owner: _Owner, timeExpire: number) {
+        this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, `user.ervice:putAuthorization`, owner.uuid32)
 
-        const jwt_token = sign({ uuid32: user.uuid32, timeExpire }, this.jwtKey);
-        this.jwtMap.set(user.uuid32, jwt_token);
+        const jwt_token = sign({ uuid32: owner.uuid32, timeExpire }, this.jwtKey);
+        this.jwtMap.set(owner.uuid32, jwt_token);
         if (Date.now() >= timeExpire) throw new Error(`请勿选择 ${new Date(timeExpire).toLocaleString()}`);
 
         return jwt_token;
@@ -142,18 +143,22 @@ export class StreamUserService {
         return match || null;
     }
 
-    private async getUserInfo (uuid32: string): Promise<UserInfo | null> {
+    private async getUserInfo (uuid32: string): Promise<UserInfo> {
         const qb = this.StreamUserDao.getQueryBuilder();
         qb
+            .where(`${this.StreamUserDao.relations_name}.uuid32 = :uuid32`, { uuid32 })
             .leftJoinAndSelect(`${this.StreamUserDao.relations_name}.joinWeChatList`, `joinWeChatList`)
             .leftJoinAndSelect(`${this.StreamUserDao.relations_name}.joinTelecomList`, `joinTelecomList`)
             .leftJoinAndSelect(`${this.StreamUserDao.relations_name}.joinEmailList`, `joinEmailList`);
-        // .where(`${this.StreamUserDao.relations_name}.uuid32 = :uuid32`, { uuid32 })
 
-
-        this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, `user.ervice:getUserInfo`, qb.getSql())
-        const match = await qb.getOne();
-        return match || null;
+        const match = await qb.getOne() as UserInfo;
+        // this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, `user.ervice:getUserInfo`, `${qb.getSql()}; ${Object.values(qb.getParameters())}`)
+        return {
+            uuid32: match?.uuid32 || '',
+            joinWeChatList: match?.joinWeChatList,
+            joinTelecomList: match?.joinTelecomList,
+            joinEmailList: match?.joinEmailList,
+        }
     }
 
     private async initial () {

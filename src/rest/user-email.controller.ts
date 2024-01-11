@@ -1,7 +1,7 @@
 import { Controller, Query, Body, Get, Post, Patch, UseGuards } from "@nestjs/common";
 import { createTransport, Transporter } from "nodemailer";
 
-import { StreamUser, PATH_STREAM_USER_EMAIL, getStreamUserEmailCodeDto, postStreamUserEmailDto, postStreamUserEmailRes, ENUM_STREAM_LOG } from "qqlx-core";
+import { StreamUser, PATH_STREAM_USER_EMAIL, patchStreamUserEmailCodeDto, postStreamUserEmailDto, postStreamUserEmailRes, ENUM_STREAM_LOG } from "qqlx-core";
 import { toNumber, toString, ToResponse, getPageDto, getConditionMatchStr, UserEmailSchema } from "qqlx-cdk";
 import { DropletHostRpc, getLocalNetworkIPs, getRandomString, StreamLogRpc, UserGuard } from "qqlx-sdk";
 
@@ -21,29 +21,16 @@ type EmailOption = {
 
 @Controller(PATH_STREAM_USER_EMAIL)
 export default class {
-    /** 用于发信的官方邮箱 */
-    emailOfficial!: string;
-    /** 发送器 */
-    emailTransport!: Transporter;
-    /** 五分钟有效时间 */
-    emailVerifyTimes = 5 * 60 * 1000;
-
-    /** 邮箱 = 验证码:创建时间 */
-    emailVerifyMap = new Map<string, string>();
-    /** 验证码 = 邮箱:创建时间 */
-    codeVerifyMap = new Map<string, string>();
 
     constructor(
-        //
         private readonly DropletHostRpc: DropletHostRpc,
         private readonly StreamLogRpc: StreamLogRpc,
         private readonly StreamUserService: StreamUserService,
         private readonly UserEmailDao: UserEmailDao
     ) { }
 
-    /** 邮箱登录 */
     @Post()
-    async post (@Body() dto: postStreamUserEmailDto): Promise<postStreamUserEmailRes> {
+    async login (@Body() dto: postStreamUserEmailDto): Promise<postStreamUserEmailRes> {
         const code = toString(dto.code).toUpperCase();
 
         // 验证码是否已经过期
@@ -51,10 +38,10 @@ export default class {
         if (!exist) throw new Error(`无效的验证码: ${code}`);
 
         const now = Date.now();
-        const email = toString(exist.split(":")[0]);
-        const timeExpire = toNumber(exist.split(":")[1]) + this.emailVerifyTimes;
+        const timeExpire = toNumber(exist.split(":")[1]) + this.codeVerifyMaxTime;
         if (now >= timeExpire) throw new Error(`验证码已经过期: ${code}`);
 
+        const email = toString(exist.split(":")[0]);
         const user = await this.StreamUserService.getUserByEmail(email);
         const result = { authorization: "" };
 
@@ -77,40 +64,58 @@ export default class {
         return result;
     }
 
+    // ========================================================================================
+    // ========================================================================================
+    // ========================================================================================
+    // ========================================================================================
+    // ========================================================================================
+    // ========================================================================================
+
+    /** 邮箱 => 验证码:创建时间 */
+    private codePatchedMap = new Map<string, string>();
+    private codePatchMaxTime = 1000 * 60
+
+    /** 验证码 => 邮箱:创建时间 */
+    private codeVerifyMap = new Map<string, string>();
+    private codeVerifyMaxTime = 1000 * 60 * 5
+
     @Get(`/code`)
-    async get (@Query() dto: getStreamUserEmailCodeDto) {
+    async patch (@Query() dto: patchStreamUserEmailCodeDto) {
+
+        // 1
         const email = toString(dto.email);
         const match = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
         if (!match) throw new Error(`请输入正确的邮箱：${email}`);
 
-        // 是否已经注册过了
-        // const user = await this.StreamUserService.getUserByEmail(email)
-        // if (user) throw new Error(`邮箱已经注册: ${email}`)
-
-        // 是否已经发送过邮件（一分钟一封）
-        const exist = this.emailVerifyMap.get(email);
+        // 2.同一个邮箱，一分钟内是否已经发送过验证码
+        const now = Date.now();
+        const exist = this.codePatchedMap.get(email);
         if (exist) {
-            const timeExpire = toNumber(exist.split(":")[1]) + 1000 * 60;
-            if (Date.now() <= timeExpire) {
+            const timeExpire = toNumber(exist.split(":")[1]) + this.codePatchMaxTime
+            if (now <= timeExpire) {
                 throw new Error(`请在 ${new Date(timeExpire).toLocaleString()} 之后发送验证码`);
             }
         }
 
-        // 发送邮件
+        // 3.通过邮件发送验证码，并缓存
         const code = getRandomString().toUpperCase();
-
-        await this.postEmail({
-            to: email,
-            subject: "Verify Code",
-            text: `${code}`,
-        });
-
-        // 缓存
-        // this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, 'email code', code)
-        const now = Date.now();
-        this.emailVerifyMap.set(email, `${code}:${now}`);
+        await this.postEmail({ to: email, subject: "Verify Code", text: `${code}` });
+        this.codePatchedMap.set(email, `${code}:${now}`);
         this.codeVerifyMap.set(code, `${email}:${now}`);
+
+        this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, 'email code', code)
     }
+
+    // ========================================================================================
+    // ========================================================================================
+    // ========================================================================================
+    // ========================================================================================
+    // ========================================================================================
+    // ========================================================================================
+
+    /** 用于发信的官方邮箱 */
+    private emailOfficial!: string;
+    private emailTransport!: Transporter;
 
     private async postEmail (option: EmailOption) {
         if (!this.emailTransport) await this.initialEmailTransporter();
@@ -124,16 +129,16 @@ export default class {
         });
     }
 
+    /**
+     * @IMAP （Internet Message Access Protocol）协议用于支持使用电子邮件客户端交互式存取服务器上的邮件。
+     * @SMTP （Simple Mail Transfer Protocol）协议用于支持使用电子邮件客户端发送电子邮件
+     */
     private async initialEmailTransporter () {
         const official_mail = await this.DropletHostRpc.get({ key: `official_mail` });
         this.emailOfficial = official_mail.remark;
 
         const official_mail_authorization_code = await this.DropletHostRpc.get({ key: `official_mail_authorization_code` });
-
-        // IMAP （Internet Message Access Protocol）协议用于支持使用电子邮件客户端交互式存取服务器上的邮件。
         const official_mail_imtp = await this.DropletHostRpc.get({ key: `official_mail_imtp` });
-
-        // SMTP （Simple Mail Transfer Protocol）协议用于支持使用电子邮件客户端发送电子邮件
         const official_mail_smtp = await this.DropletHostRpc.get({ key: `official_mail_smtp` });
 
         this.emailTransport = createTransport({

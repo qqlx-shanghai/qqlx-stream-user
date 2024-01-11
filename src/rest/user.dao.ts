@@ -19,16 +19,11 @@ import {
 } from "qqlx-cdk";
 import { getLocalNetworkIPs, PgDao } from "qqlx-sdk";
 
-// import { StreamUserSchema } from "../../../qqlx-cdk/schema-production/stream-user";
-// import { UserWeChatSchema } from "../../../qqlx-cdk/schema-production/stream-user-wechat";
-// import { UserTelecomSchema } from "../../../qqlx-cdk/schema-production/stream-user-telecom";
-// import { UserEmailSchema } from "../../../qqlx-cdk/schema-production/stream-user-email";
-
 @Injectable()
 export class StreamUserDao extends PgDao<StreamUser> {
     constructor(
         @InjectRepository(StreamUserSchema)
-        private readonly repo: Repository<StreamUserSchema>
+        private readonly repo: Repository<StreamUser>
     ) {
         super({
             repository: repo,
@@ -41,7 +36,7 @@ export class StreamUserDao extends PgDao<StreamUser> {
 export class UserWeChatDao extends PgDao<UserWeChat> {
     constructor(
         @InjectRepository(UserWeChatSchema)
-        private readonly repo: Repository<UserWeChatSchema>
+        private readonly repo: Repository<UserWeChat>
     ) {
         super({
             repository: repo,
@@ -54,7 +49,7 @@ export class UserWeChatDao extends PgDao<UserWeChat> {
 export class UserTelecomDao extends PgDao<UserTelecom> {
     constructor(
         @InjectRepository(UserTelecomSchema)
-        private readonly repo: Repository<UserTelecomSchema>
+        private readonly repo: Repository<UserTelecom>
     ) {
         super({
             repository: repo,
@@ -67,7 +62,7 @@ export class UserTelecomDao extends PgDao<UserTelecom> {
 export class UserEmailDao extends PgDao<UserEmail> {
     constructor(
         @InjectRepository(UserEmailSchema)
-        private readonly repo: Repository<UserEmailSchema>
+        private readonly repo: Repository<UserEmail>
     ) {
         super({
             repository: repo,

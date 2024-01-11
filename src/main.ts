@@ -5,10 +5,8 @@ import { } from "qqlx-core";
 import { toNumber, toString, toBoolean } from "qqlx-cdk";
 import { getLocalNetworkIPs, CommonExceptionFilter, ResponseInterceptor, DropletHostRpc, StreamLogRpc } from "qqlx-sdk";
 
-import { TcpModule } from "./tcp/module";
-import { TCP_PORT } from "./tcp/_";
-import { RestModule } from "./rest/module";
-import { REST_PORT } from "./rest/_";
+import { TCP_PORT, TcpModule } from "./tcp/module";
+import { REST_PORT, RestModule } from "./rest/module";
 
 async function bootstrap () {
     // 对内的微服务

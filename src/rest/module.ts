@@ -13,10 +13,7 @@ import { StreamUserService } from "./user.service";
 import UserEmailController from "./user-email.controller";
 import UserController from "./user.controller";
 
-// import { StreamUserSchema } from "../../../qqlx-cdk/schema-production/stream-user";
-// import { UserWeChatSchema } from "../../../qqlx-cdk/schema-production/stream-user-wechat";
-// import { UserTelecomSchema } from "../../../qqlx-cdk/schema-production/stream-user-telecom";
-// import { UserEmailSchema } from "../../../qqlx-cdk/schema-production/stream-user-email";
+export const REST_PORT = 8003;
 
 /** 相关解释
  * @imports 导入一个模块中 exports 的内容，放入公共资源池中
