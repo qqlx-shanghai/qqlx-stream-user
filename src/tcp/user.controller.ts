@@ -16,12 +16,12 @@ export default class {
     @MessagePattern(`${PATH_STREAM_USER}/get`)
     @ToResponse()
     async getUser (dto: { Authorization: string }): Promise<_Owner> {
-        return this.StreamUserService.getUserByAuthorization(dto.Authorization)
+        return this.StreamUserService.getOwner(dto.Authorization)
     }
 
     @MessagePattern(`${PATH_STREAM_USER}/info/get`)
     @ToResponse()
     async getUserInfo (dto: { Authorization: string }): Promise<getStreamUserRes> {
-        return this.StreamUserService.getUserInfoByAuthorization(dto.Authorization)
+        return this.StreamUserService.getUserInfo(dto.Authorization)
     }
 }

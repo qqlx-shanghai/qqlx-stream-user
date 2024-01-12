@@ -9,7 +9,7 @@ import { UserEmailDao, UserWeChatDao } from "./user.dao";
 import { StreamUserService } from "./user.service";
 
 @Controller(PATH_STREAM_USER)
-export default class {
+export class UserController {
 
     constructor(
         private readonly StreamUserService: StreamUserService
@@ -17,13 +17,13 @@ export default class {
 
     @Get()
     async get (@Headers('Authorization') authorization: string): Promise<getStreamUserRes> {
-        return this.StreamUserService.getUserInfoByAuthorization(authorization)
+        return this.StreamUserService.getUserInfo(authorization)
     }
 
     @Put()
-    async put (@Headers('Authorization') authorization: string, @Body() dto: putStreamUserDto): Promise<putStreamUserRes> {
-        const user = await this.StreamUserService.getUserByAuthorization(authorization)
-        const jwt_token = await this.StreamUserService.putAuthorization(user, dto.timeExpire)
+    async put (@Headers('Authorization') authorization: string, @Body('dto') dto: putStreamUserDto): Promise<putStreamUserRes> {
+        const owner = await this.StreamUserService.getOwner(authorization)
+        const jwt_token = await this.StreamUserService.putAuthorization(owner, dto.timeExpire)
         return { authorization: jwt_token }
     }
 }

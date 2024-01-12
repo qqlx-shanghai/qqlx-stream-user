@@ -10,8 +10,8 @@ import { DropletModule } from "../_/droplet.module";
 import { StreamUserDao, UserWeChatDao, UserTelecomDao, UserEmailDao } from "./user.dao";
 import { StreamUserService } from "./user.service";
 
-import UserEmailController from "./user-email.controller";
-import UserController from "./user.controller";
+import { UserEmailController } from "./user-email.controller";
+import { UserController } from "./user.controller";
 
 export const REST_PORT = 8003;
 

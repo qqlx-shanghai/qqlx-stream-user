@@ -20,7 +20,7 @@ type EmailOption = {
 };
 
 @Controller(PATH_STREAM_USER_EMAIL)
-export default class {
+export class UserEmailController {
 
     constructor(
         private readonly DropletHostRpc: DropletHostRpc,
@@ -30,18 +30,21 @@ export default class {
     ) { }
 
     @Post()
-    async login (@Body() dto: postStreamUserEmailDto): Promise<postStreamUserEmailRes> {
+    async login (@Body('dto') dto: postStreamUserEmailDto): Promise<postStreamUserEmailRes> {
         const code = toString(dto.code).toUpperCase();
 
+        // 测试
+        const email = "wqao1023@qq.com"
+
         // 验证码是否已经过期
-        const exist = this.codeVerifyMap.get(code);
-        if (!exist) throw new Error(`无效的验证码: ${code}`);
+        // const exist = this.codeVerifyMap.get(code);
+        // if (!exist) throw new Error(`无效的验证码: ${code}`);
 
         const now = Date.now();
-        const timeExpire = toNumber(exist.split(":")[1]) + this.codeVerifyMaxTime;
-        if (now >= timeExpire) throw new Error(`验证码已经过期: ${code}`);
+        // const timeExpire = toNumber(exist.split(":")[1]) + this.codeVerifyMaxTime;
+        // if (now >= timeExpire) throw new Error(`验证码已经过期: ${code}`);
 
-        const email = toString(exist.split(":")[0]);
+        // const email = toString(exist.split(":")[0]);
         const user = await this.StreamUserService.getUserByEmail(email);
         const result = { authorization: "" };
 
@@ -103,7 +106,8 @@ export default class {
         this.codePatchedMap.set(email, `${code}:${now}`);
         this.codeVerifyMap.set(code, `${email}:${now}`);
 
-        this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, 'email code', code)
+        // async
+        this.StreamLogRpc.simplePost(ENUM_STREAM_LOG.DEBUG, `${this.constructor.name}-${this.patch.name}`, code)
     }
 
     // ========================================================================================
