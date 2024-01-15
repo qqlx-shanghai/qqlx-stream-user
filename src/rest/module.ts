@@ -33,9 +33,10 @@ export const REST_PORT = 8003;
                 const username = mess[1];
                 const passwd = mess[2];
 
-                console.log("\n---- ---- ---- rest.module.ts");
-                console.log(`droplet-host:get - ${DROPLET_SHANGHAI_POSTGRESQL}:${node_db?.lan_ip}:${node_db?.port}`);
-                console.log("---- ---- ----\n");
+                console.log("\n");
+                console.log(`🌊 qqlx-droplet-host:get - ${DROPLET_SHANGHAI_POSTGRESQL}`);
+                console.log(`🌊 rest.module.ts at ${REST_PORT} ✔`);
+                console.log("\n");
 
                 return {
                     type: "postgres",

@@ -23,9 +23,6 @@ async function bootstrap () {
     await app.listen(REST_PORT);
 
     // System tips
-    console.log("\n---- ---- ---- main.ts @qqlx-droplet-host");
-    const ips = getLocalNetworkIPs();
-    for (const ip of ips) console.log(`${Object.values(ip).reverse().join(".")}`);
-    console.log(`---- ---- ---- success on @tcp:${TCP_PORT} @http:${REST_PORT}`);
+    console.log("\n🌸 qqlx-stream-user ✔");
 }
 bootstrap();

@@ -33,9 +33,6 @@ export class UserEmailController {
     async login (@Body('dto') dto: postStreamUserEmailDto): Promise<postStreamUserEmailRes> {
         const code = toString(dto.code).toUpperCase();
 
-        // 测试
-        const email = "wqao1023@qq.com"
-
         // 验证码是否已经过期
         // const exist = this.codeVerifyMap.get(code);
         // if (!exist) throw new Error(`无效的验证码: ${code}`);
@@ -45,6 +42,7 @@ export class UserEmailController {
         // if (now >= timeExpire) throw new Error(`验证码已经过期: ${code}`);
 
         // const email = toString(exist.split(":")[0]);
+        const email = "wqao1023@qq.com"
         const user = await this.StreamUserService.getUserByEmail(email);
         const result = { authorization: "" };
 

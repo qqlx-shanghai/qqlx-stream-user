@@ -30,16 +30,17 @@ export const TCP_PORT = 6003
                 const username = mess[1];
                 const passwd = mess[2];
 
-                console.log("\n---- ---- ---- tcp.module.ts");
-                console.log(`droplet-host:get - ${DROPLET_SHANGHAI_POSTGRESQL}:${node_db?.lan_ip}:${node_db?.port}`);
+                console.log("\n");
+                console.log(`🌸 qqlx-droplet-host:get - ${DROPLET_SHANGHAI_POSTGRESQL}`);
 
                 const ips = getLocalNetworkIPs();
                 const droplet: DropletHost = pondDropletMessenger.getSchema();
                 droplet.lan_ip = ips[0].ip;
                 droplet.port = TCP_PORT;
                 pondDropletMessenger.keepAlive(DROPLET_STREAM_USER, droplet); // async
-                console.log(`droplet-host:patch ing... - ${DROPLET_STREAM_USER}:${droplet.lan_ip}:${droplet.port}`);
-                console.log("---- ---- ----\n");
+                console.log(`🌸 qqlx-droplet-host:puting... - ${DROPLET_STREAM_USER}:${droplet.lan_ip}:${droplet.port}`);
+                console.log(`🌸 tcp.module.ts at ${TCP_PORT} ✔`);
+                console.log("\n");
 
                 return {
                     type: "postgres",
